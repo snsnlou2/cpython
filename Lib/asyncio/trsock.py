@@ -1,27 +1,16 @@
+
 import socket
 import warnings
 
-
-class TransportSocket:
-
-    """A socket-like wrapper for exposing real transport sockets.
-
-    These objects can be safely returned by APIs like
-    `transport.get_extra_info('socket')`.  All potentially disruptive
-    operations (like "socket.close()") are banned.
-    """
-
+class TransportSocket():
+    'A socket-like wrapper for exposing real transport sockets.\n\n    These objects can be safely returned by APIs like\n    `transport.get_extra_info(\'socket\')`.  All potentially disruptive\n    operations (like "socket.close()") are banned.\n    '
     __slots__ = ('_sock',)
 
-    def __init__(self, sock: socket.socket):
+    def __init__(self, sock):
         self._sock = sock
 
     def _na(self, what):
-        warnings.warn(
-            f"Using {what} on sockets returned from get_extra_info('socket') "
-            f"will be prohibited in asyncio 3.9. Please report your use case "
-            f"to bugs.python.org.",
-            DeprecationWarning, source=self)
+        warnings.warn(f"Using {what} on sockets returned from get_extra_info('socket') will be prohibited in asyncio 3.9. Please report your use case to bugs.python.org.", DeprecationWarning, source=self)
 
     @property
     def family(self):
@@ -36,30 +25,24 @@ class TransportSocket:
         return self._sock.proto
 
     def __repr__(self):
-        s = (
-            f"<asyncio.TransportSocket fd={self.fileno()}, "
-            f"family={self.family!s}, type={self.type!s}, "
-            f"proto={self.proto}"
-        )
-
-        if self.fileno() != -1:
+        s = f'<asyncio.TransportSocket fd={self.fileno()}, family={self.family!s}, type={self.type!s}, proto={self.proto}'
+        if (self.fileno() != (- 1)):
             try:
                 laddr = self.getsockname()
                 if laddr:
-                    s = f"{s}, laddr={laddr}"
+                    s = f'{s}, laddr={laddr}'
             except socket.error:
                 pass
             try:
                 raddr = self.getpeername()
                 if raddr:
-                    s = f"{s}, raddr={raddr}"
+                    s = f'{s}, raddr={raddr}'
             except socket.error:
                 pass
-
-        return f"{s}>"
+        return f'{s}>'
 
     def __getstate__(self):
-        raise TypeError("Cannot serialize asyncio.TransportSocket object")
+        raise TypeError('Cannot serialize asyncio.TransportSocket object')
 
     def fileno(self):
         return self._sock.fileno()
@@ -71,8 +54,6 @@ class TransportSocket:
         return self._sock.get_inheritable()
 
     def shutdown(self, how):
-        # asyncio doesn't currently provide a high-level transport API
-        # to shutdown the connection.
         self._sock.shutdown(how)
 
     def getsockopt(self, *args, **kwargs):
@@ -183,19 +164,17 @@ class TransportSocket:
         return self._sock.recv(*args, **kwargs)
 
     def settimeout(self, value):
-        if value == 0:
+        if (value == 0):
             return
-        raise ValueError(
-            'settimeout(): only 0 timeout is allowed on transport sockets')
+        raise ValueError('settimeout(): only 0 timeout is allowed on transport sockets')
 
     def gettimeout(self):
         return 0
 
     def setblocking(self, flag):
-        if not flag:
+        if (not flag):
             return
-        raise ValueError(
-            'setblocking(): transport sockets cannot be blocking')
+        raise ValueError('setblocking(): transport sockets cannot be blocking')
 
     def __enter__(self):
         self._na('context manager protocol')

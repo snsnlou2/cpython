@@ -1,11 +1,10 @@
-"Test redirector, coverage 100%."
 
+'Test redirector, coverage 100%.'
 from idlelib.redirector import WidgetRedirector
 import unittest
 from test.support import requires
 from tkinter import Tk, Text, TclError
 from idlelib.idle_test.mock_idle import Func
-
 
 class InitCloseTest(unittest.TestCase):
 
@@ -27,7 +26,7 @@ class InitCloseTest(unittest.TestCase):
         self.assertEqual(redir.widget, self.text)
         self.assertEqual(redir.tk, self.text.tk)
         self.assertRaises(TclError, WidgetRedirector, self.text)
-        redir.close()  # restore self.tk, self.text
+        redir.close()
 
     def test_close(self):
         redir = WidgetRedirector(self.text)
@@ -35,7 +34,6 @@ class InitCloseTest(unittest.TestCase):
         redir.close()
         self.assertEqual(redir._operations, {})
         self.assertFalse(hasattr(self.text, 'widget'))
-
 
 class WidgetRedirectorTest(unittest.TestCase):
 
@@ -57,13 +55,13 @@ class WidgetRedirectorTest(unittest.TestCase):
         self.redir = WidgetRedirector(self.text)
         self.func = Func()
         self.orig_insert = self.redir.register('insert', self.func)
-        self.text.insert('insert', 'asdf')  # leaves self.text empty
+        self.text.insert('insert', 'asdf')
 
     def tearDown(self):
         self.text.delete('1.0', 'end')
         self.redir.close()
 
-    def test_repr(self):  # partly for 100% coverage
+    def test_repr(self):
         self.assertIn('Redirector', repr(self.redir))
         self.assertIn('Original', repr(self.orig_insert))
 
@@ -97,7 +95,6 @@ class WidgetRedirectorTest(unittest.TestCase):
 
     def test_dispatch_bypass(self):
         self.orig_insert('insert', 'asdf')
-        # tk.call returns '' where Python would return None
         self.assertEqual(self.redir.dispatch('delete', '1.0', 'end'), '')
         self.assertEqual(self.text.get('1.0', 'end'), '\n')
 
@@ -107,16 +104,10 @@ class WidgetRedirectorTest(unittest.TestCase):
         self.assertEqual(self.redir.dispatch('invalid'), '')
 
     def test_command_dispatch(self):
-        # Test that .__init__ causes redirection of tk calls
-        # through redir.dispatch
         self.root.call(self.text._w, 'insert', 'hello')
         self.assertEqual(self.func.args, ('hello',))
         self.assertEqual(self.text.get('1.0', 'end'), '\n')
-        # Ensure that called through redir .dispatch and not through
-        # self.text.insert by having mock raise TclError.
         self.func.__init__(TclError())
         self.assertEqual(self.root.call(self.text._w, 'insert', 'boo'), '')
-
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main(verbosity=2)

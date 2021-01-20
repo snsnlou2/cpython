@@ -1,8 +1,7 @@
-"Test debugobj_r, coverage 56%."
 
+'Test debugobj_r, coverage 56%.'
 from idlelib import debugobj_r
 import unittest
-
 
 class WrappedObjectTreeItemTest(unittest.TestCase):
 
@@ -16,7 +15,5 @@ class StubObjectTreeItemTest(unittest.TestCase):
         ti = debugobj_r.StubObjectTreeItem('socket', 1111)
         self.assertEqual(ti.sockio, 'socket')
         self.assertEqual(ti.oid, 1111)
-
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main(verbosity=2)

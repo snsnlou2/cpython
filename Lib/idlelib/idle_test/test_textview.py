@@ -1,14 +1,8 @@
-"""Test textview, coverage 100%.
 
-Since all methods and functions create (or destroy) a ViewWindow, which
-is a widget containing a widget, etcetera, all tests must be gui tests.
-Using mock Text would not change this.  Other mocks are used to retrieve
-information about calls.
-"""
+'Test textview, coverage 100%.\n\nSince all methods and functions create (or destroy) a ViewWindow, which\nis a widget containing a widget, etcetera, all tests must be gui tests.\nUsing mock Text would not change this.  Other mocks are used to retrieve\ninformation about calls.\n'
 from idlelib import textview as tv
 from test.support import requires
 requires('gui')
-
 import os
 import unittest
 from tkinter import Tk, TclError, CHAR, NONE, WORD
@@ -27,18 +21,11 @@ def tearDownModule():
     root.destroy()
     del root
 
-# If we call ViewWindow or wrapper functions with defaults
-# modal=True, _utest=False, test hangs on call to wait_window.
-# Have also gotten tk error 'can't invoke "event" command'.
-
-
-class VW(tv.ViewWindow):  # Used in ViewWindowTest.
+class VW(tv.ViewWindow):
     transient = Func()
     grab_set = Func()
     wait_window = Func()
 
-
-# Call wrapper class VW with mock wait_window.
 class ViewWindowTest(unittest.TestCase):
 
     def setUp(self):
@@ -65,17 +52,15 @@ class ViewWindowTest(unittest.TestCase):
         view.destroy = Func()
         view.ok()
         self.assertTrue(view.destroy.called)
-        del view.destroy  # Unmask real function.
+        del view.destroy
         view.destroy()
 
-
 class AutoHideScrollbarTest(unittest.TestCase):
-    # Method set is tested in ScrollableTextFrameTest
+
     def test_forbidden_geometry(self):
         scroll = tv.AutoHideScrollbar(root)
         self.assertRaises(TclError, scroll.pack)
         self.assertRaises(TclError, scroll.place)
-
 
 class ScrollableTextFrameTest(unittest.TestCase):
 
@@ -92,6 +77,7 @@ class ScrollableTextFrameTest(unittest.TestCase):
 
     def make_frame(self, wrap=NONE, **kwargs):
         frame = tv.ScrollableTextFrame(self.root, wrap=wrap, **kwargs)
+
         def cleanup_frame():
             frame.update_idletasks()
             frame.destroy()
@@ -104,22 +90,14 @@ class ScrollableTextFrameTest(unittest.TestCase):
         self.assertEqual(frame.text.get('1.0', '1.end'), 'test text')
 
     def test_horiz_scrollbar(self):
-        # The horizontal scrollbar should be shown/hidden according to
-        # the 'wrap' setting: It should only be shown when 'wrap' is
-        # set to NONE.
-
-        # wrap = NONE -> with horizontal scrolling
         frame = self.make_frame(wrap=NONE)
         self.assertEqual(frame.text.cget('wrap'), NONE)
         self.assertIsNotNone(frame.xscroll)
-
-        # wrap != NONE -> no horizontal scrolling
         for wrap in [CHAR, WORD]:
             with self.subTest(wrap=wrap):
                 frame = self.make_frame(wrap=wrap)
                 self.assertEqual(frame.text.cget('wrap'), wrap)
                 self.assertIsNone(frame.xscroll)
-
 
 class ViewFrameTest(unittest.TestCase):
 
@@ -140,8 +118,6 @@ class ViewFrameTest(unittest.TestCase):
         get = self.frame.text.get
         self.assertEqual(get('1.0', '1.end'), 'test text')
 
-
-# Call ViewWindow with modal=False.
 class ViewFunctionTest(unittest.TestCase):
 
     @classmethod
@@ -169,7 +145,6 @@ class ViewFunctionTest(unittest.TestCase):
         view.ok()
 
     def test_bad_file(self):
-        # Mock showerror will be used; view_file will return None.
         view = tv.view_file(root, 'Title', 'abc.xyz', 'ascii', modal=False)
         self.assertIsNone(view)
         self.assertEqual(tv.showerror.title, 'File Load Error')
@@ -186,8 +161,6 @@ class ViewFunctionTest(unittest.TestCase):
         text_widget = view.viewframe.textframe.text
         self.assertEqual(text_widget.cget('wrap'), 'none')
 
-
-# Call ViewWindow with _utest=True.
 class ButtonClickTest(unittest.TestCase):
 
     def setUp(self):
@@ -199,27 +172,25 @@ class ButtonClickTest(unittest.TestCase):
             self.view.destroy()
 
     def test_view_text_bind_with_button(self):
+
         def _command():
             self.called = True
             self.view = tv.view_text(root, 'TITLE_TEXT', 'COMMAND', _utest=True)
         button = Button(root, text='BUTTON', command=_command)
         button.invoke()
         self.addCleanup(button.destroy)
-
         self.assertEqual(self.called, True)
         self.assertEqual(self.view.title(), 'TITLE_TEXT')
-        self.assertEqual(self.view.viewframe.textframe.text.get('1.0', '1.end'),
-                         'COMMAND')
+        self.assertEqual(self.view.viewframe.textframe.text.get('1.0', '1.end'), 'COMMAND')
 
     def test_view_file_bind_with_button(self):
+
         def _command():
             self.called = True
-            self.view = tv.view_file(root, 'TITLE_FILE', __file__,
-                                     encoding='ascii', _utest=True)
+            self.view = tv.view_file(root, 'TITLE_FILE', __file__, encoding='ascii', _utest=True)
         button = Button(root, text='BUTTON', command=_command)
         button.invoke()
         self.addCleanup(button.destroy)
-
         self.assertEqual(self.called, True)
         self.assertEqual(self.view.title(), 'TITLE_FILE')
         get = self.view.viewframe.textframe.text.get
@@ -227,7 +198,5 @@ class ButtonClickTest(unittest.TestCase):
             self.assertEqual(get('1.0', '1.end'), f.readline().strip())
             f.readline()
             self.assertEqual(get('3.0', '3.end'), f.readline().strip())
-
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main(verbosity=2)

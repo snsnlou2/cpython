@@ -1,11 +1,9 @@
-"Test autocomplete_w, coverage 11%."
 
+'Test autocomplete_w, coverage 11%.'
 import unittest
 from test.support import requires
 from tkinter import Tk, Text
-
 import idlelib.autocomplete_w as acw
-
 
 class AutoCompleteWindowTest(unittest.TestCase):
 
@@ -26,7 +24,5 @@ class AutoCompleteWindowTest(unittest.TestCase):
 
     def test_init(self):
         self.assertEqual(self.acw.widget, self.text)
-
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main(verbosity=2)

@@ -1,11 +1,12 @@
+
 import sqlite3 as sqlite
 import unittest
 
-
-@unittest.skipIf(sqlite.sqlite_version_info < (3, 6, 11), "Backup API not supported")
+@unittest.skipIf((sqlite.sqlite_version_info < (3, 6, 11)), 'Backup API not supported')
 class BackupTests(unittest.TestCase):
+
     def setUp(self):
-        cx = self.cx = sqlite.connect(":memory:")
+        cx = self.cx = sqlite.connect(':memory:')
         cx.execute('CREATE TABLE foo (key INTEGER)')
         cx.executemany('INSERT INTO foo (key) VALUES (?)', [(3,), (4,)])
         cx.commit()
@@ -14,7 +15,7 @@ class BackupTests(unittest.TestCase):
         self.cx.close()
 
     def verify_backup(self, bckcx):
-        result = bckcx.execute("SELECT key FROM foo ORDER BY key").fetchall()
+        result = bckcx.execute('SELECT key FROM foo ORDER BY key').fetchall()
         self.assertEqual(result[0][0], 3)
         self.assertEqual(result[1][0], 4)
 
@@ -42,7 +43,7 @@ class BackupTests(unittest.TestCase):
         bck.executemany('INSERT INTO bar (key) VALUES (?)', [(3,), (4,)])
         with self.assertRaises(sqlite.OperationalError) as cm:
             self.cx.backup(bck)
-        if sqlite.sqlite_version_info < (3, 8, 8):
+        if (sqlite.sqlite_version_info < (3, 8, 8)):
             self.assertEqual(str(cm.exception), 'target is in transaction')
 
     def test_keyword_only_args(self):
@@ -60,11 +61,9 @@ class BackupTests(unittest.TestCase):
 
         def progress(status, remaining, total):
             journal.append(status)
-
         with sqlite.connect(':memory:') as bck:
             self.cx.backup(bck, pages=1, progress=progress)
             self.verify_backup(bck)
-
         self.assertEqual(len(journal), 2)
         self.assertEqual(journal[0], sqlite.SQLITE_OK)
         self.assertEqual(journal[1], sqlite.SQLITE_DONE)
@@ -74,11 +73,9 @@ class BackupTests(unittest.TestCase):
 
         def progress(status, remaining, total):
             journal.append(remaining)
-
         with sqlite.connect(':memory:') as bck:
             self.cx.backup(bck, progress=progress)
             self.verify_backup(bck)
-
         self.assertEqual(len(journal), 1)
         self.assertEqual(journal[0], 0)
 
@@ -87,11 +84,9 @@ class BackupTests(unittest.TestCase):
 
         def progress(status, remaining, total):
             journal.append(remaining)
-
         with sqlite.connect(':memory:') as bck:
-            self.cx.backup(bck, pages=-1, progress=progress)
+            self.cx.backup(bck, pages=(- 1), progress=progress)
             self.verify_backup(bck)
-
         self.assertEqual(len(journal), 1)
         self.assertEqual(journal[0], 0)
 
@@ -105,29 +100,24 @@ class BackupTests(unittest.TestCase):
         journal = []
 
         def progress(status, remaining, total):
-            if not journal:
-                self.cx.execute('INSERT INTO foo (key) VALUES (?)', (remaining+1000,))
+            if (not journal):
+                self.cx.execute('INSERT INTO foo (key) VALUES (?)', ((remaining + 1000),))
                 self.cx.commit()
             journal.append(remaining)
-
         with sqlite.connect(':memory:') as bck:
             self.cx.backup(bck, pages=1, progress=progress)
             self.verify_backup(bck)
-
-            result = bck.execute("SELECT key FROM foo"
-                                 " WHERE key >= 1000"
-                                 " ORDER BY key").fetchall()
+            result = bck.execute('SELECT key FROM foo WHERE key >= 1000 ORDER BY key').fetchall()
             self.assertEqual(result[0][0], 1001)
-
         self.assertEqual(len(journal), 3)
         self.assertEqual(journal[0], 1)
         self.assertEqual(journal[1], 1)
         self.assertEqual(journal[2], 0)
 
     def test_failing_progress(self):
+
         def progress(status, remaining, total):
             raise SystemError('nearly out of space')
-
         with self.assertRaises(SystemError) as err:
             with sqlite.connect(':memory:') as bck:
                 self.cx.backup(bck, progress=progress)
@@ -141,11 +131,7 @@ class BackupTests(unittest.TestCase):
         with self.assertRaises(sqlite.OperationalError) as cm:
             with sqlite.connect(':memory:') as bck:
                 self.cx.backup(bck, name='non-existing')
-        self.assertIn(
-            str(cm.exception),
-            ['SQL logic error', 'SQL logic error or missing database']
-        )
-
+        self.assertIn(str(cm.exception), ['SQL logic error', 'SQL logic error or missing database'])
         self.cx.execute("ATTACH DATABASE ':memory:' AS attached_db")
         self.cx.execute('CREATE TABLE attached_db.foo (key INTEGER)')
         self.cx.executemany('INSERT INTO attached_db.foo (key) VALUES (?)', [(3,), (4,)])
@@ -154,9 +140,7 @@ class BackupTests(unittest.TestCase):
             self.cx.backup(bck, name='attached_db')
             self.verify_backup(bck)
 
-
 def suite():
     return unittest.makeSuite(BackupTests)
-
-if __name__ == "__main__":
+if (__name__ == '__main__'):
     unittest.main()

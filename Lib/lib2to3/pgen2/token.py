@@ -1,11 +1,5 @@
-#! /usr/bin/env python3
 
-"""Token constants (from "token.h")."""
-
-#  Taken from Python (r53757) and modified to include some tokens
-#   originally monkeypatched in by pgen2.tokenize
-
-#--start constants--
+'Token constants (from "token.h").'
 ENDMARKER = 0
 NAME = 1
 NUMBER = 2
@@ -68,19 +62,16 @@ ERRORTOKEN = 58
 COLONEQUAL = 59
 N_TOKENS = 60
 NT_OFFSET = 256
-#--end constants--
-
 tok_name = {}
-for _name, _value in list(globals().items()):
-    if type(_value) is type(0):
+for (_name, _value) in list(globals().items()):
+    if (type(_value) is type(0)):
         tok_name[_value] = _name
 
-
 def ISTERMINAL(x):
-    return x < NT_OFFSET
+    return (x < NT_OFFSET)
 
 def ISNONTERMINAL(x):
-    return x >= NT_OFFSET
+    return (x >= NT_OFFSET)
 
 def ISEOF(x):
-    return x == ENDMARKER
+    return (x == ENDMARKER)

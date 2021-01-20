@@ -1,11 +1,10 @@
-"Test runscript, coverage 16%."
 
+'Test runscript, coverage 16%.'
 from idlelib import runscript
 import unittest
 from test.support import requires
 from tkinter import Tk
 from idlelib.editor import EditorWindow
-
 
 class ScriptBindingTest(unittest.TestCase):
 
@@ -19,7 +18,7 @@ class ScriptBindingTest(unittest.TestCase):
     def tearDownClass(cls):
         cls.root.update_idletasks()
         for id in cls.root.tk.call('after', 'info'):
-            cls.root.after_cancel(id)  # Need for EditorWindow.
+            cls.root.after_cancel(id)
         cls.root.destroy()
         del cls.root
 
@@ -27,7 +26,5 @@ class ScriptBindingTest(unittest.TestCase):
         ew = EditorWindow(root=self.root)
         sb = runscript.ScriptBinding(ew)
         ew._close()
-
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main(verbosity=2)

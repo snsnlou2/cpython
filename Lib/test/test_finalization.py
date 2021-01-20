@@ -1,37 +1,29 @@
-"""
-Tests for object finalization semantics, as outlined in PEP 442.
-"""
 
+'\nTests for object finalization semantics, as outlined in PEP 442.\n'
 import contextlib
 import gc
 import unittest
 import weakref
-
 try:
     from _testcapi import with_tp_del
 except ImportError:
+
     def with_tp_del(cls):
+
         class C(object):
+
             def __new__(cls, *args, **kwargs):
                 raise TypeError('requires _testcapi.with_tp_del')
         return C
-
 from test import support
 
-
-class NonGCSimpleBase:
-    """
-    The base class for all the objects under test, equipped with various
-    testing features.
-    """
-
+class NonGCSimpleBase():
+    '\n    The base class for all the objects under test, equipped with various\n    testing features.\n    '
     survivors = []
     del_calls = []
     tp_del_calls = []
     errors = []
-
     _cleaning = False
-
     __slots__ = ()
 
     @classmethod
@@ -46,15 +38,13 @@ class NonGCSimpleBase:
     @classmethod
     @contextlib.contextmanager
     def test(cls):
-        """
-        A context manager to use around all finalization tests.
-        """
+        '\n        A context manager to use around all finalization tests.\n        '
         with support.disable_gc():
             cls.del_calls.clear()
             cls.tp_del_calls.clear()
             NonGCSimpleBase._cleaning = False
             try:
-                yield
+                (yield)
                 if cls.errors:
                     raise cls.errors[0]
             finally:
@@ -62,17 +52,12 @@ class NonGCSimpleBase:
                 cls._cleanup()
 
     def check_sanity(self):
-        """
-        Check the object is sane (non-broken).
-        """
+        '\n        Check the object is sane (non-broken).\n        '
 
     def __del__(self):
-        """
-        PEP 442 finalizer.  Record that this was called, check the
-        object is in a sane state, and invoke a side effect.
-        """
+        '\n        PEP 442 finalizer.  Record that this was called, check the\n        object is in a sane state, and invoke a side effect.\n        '
         try:
-            if not self._cleaning:
+            if (not self._cleaning):
                 self.del_calls.append(id(self))
                 self.check_sanity()
                 self.side_effect()
@@ -80,10 +65,7 @@ class NonGCSimpleBase:
             self.errors.append(e)
 
     def side_effect(self):
-        """
-        A side effect called on destruction.
-        """
-
+        '\n        A side effect called on destruction.\n        '
 
 class SimpleBase(NonGCSimpleBase):
 
@@ -91,8 +73,7 @@ class SimpleBase(NonGCSimpleBase):
         self.id_ = id(self)
 
     def check_sanity(self):
-        assert self.id_ == id(self)
-
+        assert (self.id_ == id(self))
 
 class NonGC(NonGCSimpleBase):
     __slots__ = ()
@@ -101,9 +82,7 @@ class NonGCResurrector(NonGCSimpleBase):
     __slots__ = ()
 
     def side_effect(self):
-        """
-        Resurrect self by storing self in a class-wide list.
-        """
+        '\n        Resurrect self by storing self in a class-wide list.\n        '
         self.survivors.append(self)
 
 class Simple(SimpleBase):
@@ -112,15 +91,13 @@ class Simple(SimpleBase):
 class SimpleResurrector(NonGCResurrector, SimpleBase):
     pass
 
-
-class TestBase:
+class TestBase():
 
     def setUp(self):
         self.old_garbage = gc.garbage[:]
         gc.garbage[:] = []
 
     def tearDown(self):
-        # None of the tests here should put anything in gc.garbage
         try:
             self.assertEqual(gc.garbage, [])
         finally:
@@ -134,19 +111,16 @@ class TestBase:
         self.assertEqual(sorted(SimpleBase.tp_del_calls), sorted(ids))
 
     def assert_survivors(self, ids):
-        self.assertEqual(sorted(id(x) for x in SimpleBase.survivors), sorted(ids))
+        self.assertEqual(sorted((id(x) for x in SimpleBase.survivors)), sorted(ids))
 
     def assert_garbage(self, ids):
-        self.assertEqual(sorted(id(x) for x in gc.garbage), sorted(ids))
+        self.assertEqual(sorted((id(x) for x in gc.garbage)), sorted(ids))
 
     def clear_survivors(self):
         SimpleBase.survivors.clear()
 
-
 class SimpleFinalizationTest(TestBase, unittest.TestCase):
-    """
-    Test finalization without refcycles.
-    """
+    '\n    Test finalization without refcycles.\n    '
 
     def test_simple(self):
         with SimpleBase.test():
@@ -202,11 +176,10 @@ class SimpleFinalizationTest(TestBase, unittest.TestCase):
             self.assert_survivors(ids)
             self.clear_survivors()
             gc.collect()
-            self.assert_del_calls(ids * 2)
+            self.assert_del_calls((ids * 2))
             self.assert_survivors(ids)
 
-
-class SelfCycleBase:
+class SelfCycleBase():
 
     def __init__(self):
         super().__init__()
@@ -214,7 +187,7 @@ class SelfCycleBase:
 
     def check_sanity(self):
         super().check_sanity()
-        assert self.ref is self
+        assert (self.ref is self)
 
 class SimpleSelfCycle(SelfCycleBase, Simple):
     pass
@@ -225,17 +198,11 @@ class SelfCycleResurrector(SelfCycleBase, SimpleResurrector):
 class SuicidalSelfCycle(SelfCycleBase, Simple):
 
     def side_effect(self):
-        """
-        Explicitly break the reference cycle.
-        """
+        '\n        Explicitly break the reference cycle.\n        '
         self.ref = None
 
-
 class SelfCycleFinalizationTest(TestBase, unittest.TestCase):
-    """
-    Test finalization of an object having a single cyclic reference to
-    itself.
-    """
+    '\n    Test finalization of an object having a single cyclic reference to\n    itself.\n    '
 
     def test_simple(self):
         with SimpleBase.test():
@@ -252,7 +219,6 @@ class SelfCycleFinalizationTest(TestBase, unittest.TestCase):
             self.assert_survivors([])
 
     def test_simple_resurrect(self):
-        # Test that __del__ can resurrect the object being finalized.
         with SimpleBase.test():
             s = SelfCycleResurrector()
             ids = [id(s)]
@@ -261,10 +227,7 @@ class SelfCycleFinalizationTest(TestBase, unittest.TestCase):
             gc.collect()
             self.assert_del_calls(ids)
             self.assert_survivors(ids)
-            # XXX is this desirable?
             self.assertIs(wr(), None)
-            # When trying to destroy the object a second time, __del__
-            # isn't called anymore (and the object isn't resurrected).
             self.clear_survivors()
             gc.collect()
             self.assert_del_calls(ids)
@@ -272,8 +235,6 @@ class SelfCycleFinalizationTest(TestBase, unittest.TestCase):
             self.assertIs(wr(), None)
 
     def test_simple_suicide(self):
-        # Test the GC is able to deal with an object that kills its last
-        # reference during __del__.
         with SimpleBase.test():
             s = SuicidalSelfCycle()
             ids = [id(s)]
@@ -288,8 +249,7 @@ class SelfCycleFinalizationTest(TestBase, unittest.TestCase):
             self.assert_survivors([])
             self.assertIs(wr(), None)
 
-
-class ChainedBase:
+class ChainedBase():
 
     def chain(self, left):
         self.suicided = False
@@ -299,19 +259,19 @@ class ChainedBase:
     def check_sanity(self):
         super().check_sanity()
         if self.suicided:
-            assert self.left is None
-            assert self.right is None
+            assert (self.left is None)
+            assert (self.right is None)
         else:
             left = self.left
             if left.suicided:
-                assert left.right is None
+                assert (left.right is None)
             else:
-                assert left.right is self
+                assert (left.right is self)
             right = self.right
             if right.suicided:
-                assert right.left is None
+                assert (right.left is None)
             else:
-                assert right.left is self
+                assert (right.left is self)
 
 class SimpleChained(ChainedBase, Simple):
     pass
@@ -322,25 +282,18 @@ class ChainedResurrector(ChainedBase, SimpleResurrector):
 class SuicidalChained(ChainedBase, Simple):
 
     def side_effect(self):
-        """
-        Explicitly break the reference cycle.
-        """
+        '\n        Explicitly break the reference cycle.\n        '
         self.suicided = True
         self.left = None
         self.right = None
 
-
 class CycleChainFinalizationTest(TestBase, unittest.TestCase):
-    """
-    Test finalization of a cyclic chain.  These tests are similar in
-    spirit to the self-cycle tests above, but the collectable object
-    graph isn't trivial anymore.
-    """
+    "\n    Test finalization of a cyclic chain.  These tests are similar in\n    spirit to the self-cycle tests above, but the collectable object\n    graph isn't trivial anymore.\n    "
 
     def build_chain(self, classes):
         nodes = [cls() for cls in classes]
         for i in range(len(nodes)):
-            nodes[i].chain(nodes[i-1])
+            nodes[i].chain(nodes[(i - 1)])
         return nodes
 
     def check_non_resurrecting_chain(self, classes):
@@ -353,7 +306,7 @@ class CycleChainFinalizationTest(TestBase, unittest.TestCase):
             gc.collect()
             self.assert_del_calls(ids)
             self.assert_survivors([])
-            self.assertEqual([wr() for wr in wrs], [None] * N)
+            self.assertEqual([wr() for wr in wrs], ([None] * N))
             gc.collect()
             self.assert_del_calls(ids)
 
@@ -369,62 +322,50 @@ class CycleChainFinalizationTest(TestBase, unittest.TestCase):
             gc.collect()
             self.assert_del_calls(ids)
             self.assert_survivors(survivor_ids)
-            # XXX desirable?
-            self.assertEqual([wr() for wr in wrs], [None] * N)
+            self.assertEqual([wr() for wr in wrs], ([None] * N))
             self.clear_survivors()
             gc.collect()
             self.assert_del_calls(ids)
             self.assert_survivors([])
 
     def test_homogenous(self):
-        self.check_non_resurrecting_chain([SimpleChained] * 3)
+        self.check_non_resurrecting_chain(([SimpleChained] * 3))
 
     def test_homogenous_resurrect(self):
-        self.check_resurrecting_chain([ChainedResurrector] * 3)
+        self.check_resurrecting_chain(([ChainedResurrector] * 3))
 
     def test_homogenous_suicidal(self):
-        self.check_non_resurrecting_chain([SuicidalChained] * 3)
+        self.check_non_resurrecting_chain(([SuicidalChained] * 3))
 
     def test_heterogenous_suicidal_one(self):
-        self.check_non_resurrecting_chain([SuicidalChained, SimpleChained] * 2)
+        self.check_non_resurrecting_chain(([SuicidalChained, SimpleChained] * 2))
 
     def test_heterogenous_suicidal_two(self):
-        self.check_non_resurrecting_chain(
-            [SuicidalChained] * 2 + [SimpleChained] * 2)
+        self.check_non_resurrecting_chain((([SuicidalChained] * 2) + ([SimpleChained] * 2)))
 
     def test_heterogenous_resurrect_one(self):
-        self.check_resurrecting_chain([ChainedResurrector, SimpleChained] * 2)
+        self.check_resurrecting_chain(([ChainedResurrector, SimpleChained] * 2))
 
     def test_heterogenous_resurrect_two(self):
-        self.check_resurrecting_chain(
-            [ChainedResurrector, SimpleChained, SuicidalChained] * 2)
+        self.check_resurrecting_chain(([ChainedResurrector, SimpleChained, SuicidalChained] * 2))
 
     def test_heterogenous_resurrect_three(self):
-        self.check_resurrecting_chain(
-            [ChainedResurrector] * 2 + [SimpleChained] * 2 + [SuicidalChained] * 2)
-
-
-# NOTE: the tp_del slot isn't automatically inherited, so we have to call
-# with_tp_del() for each instantiated class.
+        self.check_resurrecting_chain(((([ChainedResurrector] * 2) + ([SimpleChained] * 2)) + ([SuicidalChained] * 2)))
 
 class LegacyBase(SimpleBase):
 
     def __del__(self):
         try:
-            # Do not invoke side_effect here, since we are now exercising
-            # the tp_del slot.
-            if not self._cleaning:
+            if (not self._cleaning):
                 self.del_calls.append(id(self))
                 self.check_sanity()
         except Exception as e:
             self.errors.append(e)
 
     def __tp_del__(self):
-        """
-        Legacy (pre-PEP 442) finalizer, mapped to a tp_del slot.
-        """
+        '\n        Legacy (pre-PEP 442) finalizer, mapped to a tp_del slot.\n        '
         try:
-            if not self._cleaning:
+            if (not self._cleaning):
                 self.tp_del_calls.append(id(self))
                 self.check_sanity()
                 self.side_effect()
@@ -439,25 +380,18 @@ class Legacy(LegacyBase):
 class LegacyResurrector(LegacyBase):
 
     def side_effect(self):
-        """
-        Resurrect self by storing self in a class-wide list.
-        """
+        '\n        Resurrect self by storing self in a class-wide list.\n        '
         self.survivors.append(self)
 
 @with_tp_del
 class LegacySelfCycle(SelfCycleBase, LegacyBase):
     pass
 
-
 @support.cpython_only
 class LegacyFinalizationTest(TestBase, unittest.TestCase):
-    """
-    Test finalization of objects with a tp_del.
-    """
+    '\n    Test finalization of objects with a tp_del.\n    '
 
     def tearDown(self):
-        # These tests need to clean up a bit more, since they create
-        # uncollectable objects.
         gc.garbage.clear()
         gc.collect()
         super().tearDown()
@@ -487,17 +421,15 @@ class LegacyFinalizationTest(TestBase, unittest.TestCase):
             self.assert_del_calls(ids)
             self.assert_tp_del_calls(ids)
             self.assert_survivors(ids)
-            # weakrefs are cleared before tp_del is called.
             self.assertIs(wr(), None)
             self.clear_survivors()
             gc.collect()
             self.assert_del_calls(ids)
-            self.assert_tp_del_calls(ids * 2)
+            self.assert_tp_del_calls((ids * 2))
             self.assert_survivors(ids)
         self.assertIs(wr(), None)
 
     def test_legacy_self_cycle(self):
-        # Self-cycles with legacy finalizers end up in gc.garbage.
         with SimpleBase.test():
             s = LegacySelfCycle()
             ids = [id(s)]
@@ -509,11 +441,8 @@ class LegacyFinalizationTest(TestBase, unittest.TestCase):
             self.assert_survivors([])
             self.assert_garbage(ids)
             self.assertIsNot(wr(), None)
-            # Break the cycle to allow collection
             gc.garbage[0].ref = None
         self.assert_garbage([])
         self.assertIs(wr(), None)
-
-
-if __name__ == "__main__":
+if (__name__ == '__main__'):
     unittest.main()

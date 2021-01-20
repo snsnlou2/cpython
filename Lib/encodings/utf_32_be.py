@@ -1,16 +1,13 @@
-"""
-Python 'utf-32-be' Codec
-"""
+
+"\nPython 'utf-32-be' Codec\n"
 import codecs
-
-### Codec APIs
-
 encode = codecs.utf_32_be_encode
 
 def decode(input, errors='strict'):
     return codecs.utf_32_be_decode(input, errors, True)
 
 class IncrementalEncoder(codecs.IncrementalEncoder):
+
     def encode(self, input, final=False):
         return codecs.utf_32_be_encode(input, self.errors)[0]
 
@@ -23,15 +20,5 @@ class StreamWriter(codecs.StreamWriter):
 class StreamReader(codecs.StreamReader):
     decode = codecs.utf_32_be_decode
 
-### encodings module API
-
 def getregentry():
-    return codecs.CodecInfo(
-        name='utf-32-be',
-        encode=encode,
-        decode=decode,
-        incrementalencoder=IncrementalEncoder,
-        incrementaldecoder=IncrementalDecoder,
-        streamreader=StreamReader,
-        streamwriter=StreamWriter,
-    )
+    return codecs.CodecInfo(name='utf-32-be', encode=encode, decode=decode, incrementalencoder=IncrementalEncoder, incrementaldecoder=IncrementalDecoder, streamreader=StreamReader, streamwriter=StreamWriter)

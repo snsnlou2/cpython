@@ -1,4 +1,3 @@
-# Helper module for testing the skipmodules argument of warnings.warn()
 
 import warnings
 

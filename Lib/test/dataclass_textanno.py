@@ -1,12 +1,9 @@
-from __future__ import annotations
 
+from __future__ import annotations
 import dataclasses
 
-
-class Foo:
+class Foo():
     pass
 
-
 @dataclasses.dataclass
-class Bar:
-    foo: Foo
+class Bar():

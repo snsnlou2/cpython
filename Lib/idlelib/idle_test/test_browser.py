@@ -1,18 +1,15 @@
-"Test browser, coverage 90%."
 
+'Test browser, coverage 90%.'
 from idlelib import browser
 from test.support import requires
 import unittest
 from unittest import mock
 from idlelib.idle_test.mock_idle import Func
-
 from collections import deque
 import os.path
 import pyclbr
 from tkinter import Tk
-
 from idlelib.tree import TreeNode
-
 
 class ModuleBrowserTest(unittest.TestCase):
 
@@ -56,11 +53,8 @@ class ModuleBrowserTest(unittest.TestCase):
         self.assertTrue(mb.top.destroy.called)
         self.assertTrue(mb.node.destroy.called)
         del mb.top.destroy, mb.node.destroy
-
-
-# Nested tree same as in test_pyclbr.py except for supers on C0. C1.
 mb = pyclbr
-module, fname = 'test', 'test.py'
+(module, fname) = ('test', 'test.py')
 C0 = mb.Class(module, 'C0', ['base'], fname, 1)
 F1 = mb._nest_function(C0, 'F1', 3)
 C1 = mb._nest_class(C0, 'C1', 6, [''])
@@ -71,45 +65,33 @@ f1 = mb._nest_function(f0, 'f1', 12)
 f2 = mb._nest_function(f1, 'f2', 13)
 c1 = mb._nest_class(f0, 'c1', 15)
 mock_pyclbr_tree = {'C0': C0, 'f0': f0}
-
-# Adjust C0.name, C1.name so tests do not depend on order.
-browser.transform_children(mock_pyclbr_tree, 'test')  # C0(base)
-browser.transform_children(C0.children)  # C1()
-
-# The class below checks that the calls above are correct
-# and that duplicate calls have no effect.
-
+browser.transform_children(mock_pyclbr_tree, 'test')
+browser.transform_children(C0.children)
 
 class TransformChildrenTest(unittest.TestCase):
 
     def test_transform_module_children(self):
         eq = self.assertEqual
         transform = browser.transform_children
-        # Parameter matches tree module.
         tcl = list(transform(mock_pyclbr_tree, 'test'))
         eq(tcl, [C0, f0])
         eq(tcl[0].name, 'C0(base)')
         eq(tcl[1].name, 'f0')
-        # Check that second call does not change suffix.
         tcl = list(transform(mock_pyclbr_tree, 'test'))
         eq(tcl[0].name, 'C0(base)')
-        # Nothing to traverse if parameter name isn't same as tree module.
         tcl = list(transform(mock_pyclbr_tree, 'different name'))
         eq(tcl, [])
 
     def test_transform_node_children(self):
         eq = self.assertEqual
         transform = browser.transform_children
-        # Class with two children, one name altered.
         tcl = list(transform(C0.children))
         eq(tcl, [F1, C1])
         eq(tcl[0].name, 'F1')
         eq(tcl[1].name, 'C1()')
         tcl = list(transform(C0.children))
         eq(tcl[1].name, 'C1()')
-        # Function with two children.
         eq(list(transform(f0.children)), [f1, c1])
-
 
 class ModuleBrowserTreeItemTest(unittest.TestCase):
 
@@ -143,7 +125,7 @@ class ModuleBrowserTreeItemTest(unittest.TestCase):
     def test_getsublist(self):
         mbt = self.mbt
         mbt.listchildren = Func(result=[f0, C0])
-        sub0, sub1 = mbt.GetSubList()
+        (sub0, sub1) = mbt.GetSubList()
         del mbt.listchildren
         self.assertIsInstance(sub0, browser.ChildBrowserTreeItem)
         self.assertIsInstance(sub1, browser.ChildBrowserTreeItem)
@@ -153,16 +135,13 @@ class ModuleBrowserTreeItemTest(unittest.TestCase):
     @mock.patch('idlelib.browser.file_open')
     def test_ondoubleclick(self, fopen):
         mbt = self.mbt
-
         with mock.patch('os.path.exists', return_value=False):
             mbt.OnDoubleClick()
             fopen.assert_not_called()
-
         with mock.patch('os.path.exists', return_value=True):
             mbt.OnDoubleClick()
             fopen.assert_called()
             fopen.called_with(fname)
-
 
 class ChildBrowserTreeItemTest(unittest.TestCase):
 
@@ -200,12 +179,10 @@ class ChildBrowserTreeItemTest(unittest.TestCase):
     def test_getsublist(self):
         eq = self.assertEqual
         CBT = browser.ChildBrowserTreeItem
-
         f1sublist = self.cbt_f1.GetSubList()
         self.assertIsInstance(f1sublist[0], CBT)
         eq(len(f1sublist), 1)
         eq(f1sublist[0].name, 'f2')
-
         eq(self.cbt_F1.GetSubList(), [])
 
     @mock.patch('idlelib.browser.file_open')
@@ -215,22 +192,14 @@ class ChildBrowserTreeItemTest(unittest.TestCase):
         fopen.assert_called()
         goto.assert_called()
         goto.assert_called_with(self.cbt_F1.obj.lineno)
-        # Failure test would have to raise OSError or AttributeError.
-
 
 class NestedChildrenTest(unittest.TestCase):
-    "Test that all the nodes in a nested tree are added to the BrowserTree."
+    'Test that all the nodes in a nested tree are added to the BrowserTree.'
 
     def test_nested(self):
         queue = deque()
         actual_names = []
-        # The tree items are processed in breadth first order.
-        # Verify that processing each sublist hits every node and
-        # in the right order.
-        expected_names = ['f0', 'C0(base)',
-                          'f1', 'c1', 'F1', 'C1()',
-                          'f2', 'C2',
-                          'F3']
+        expected_names = ['f0', 'C0(base)', 'f1', 'c1', 'F1', 'C1()', 'f2', 'C2', 'F3']
         CBT = browser.ChildBrowserTreeItem
         queue.extend((CBT(f0), CBT(C0)))
         while queue:
@@ -239,10 +208,8 @@ class NestedChildrenTest(unittest.TestCase):
             queue.extend(sublist)
             self.assertIn(cb.name, cb.GetText())
             self.assertIn(cb.GetIconName(), ('python', 'folder'))
-            self.assertIs(cb.IsExpandable(), sublist != [])
+            self.assertIs(cb.IsExpandable(), (sublist != []))
             actual_names.append(cb.name)
         self.assertEqual(actual_names, expected_names)
-
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main(verbosity=2)

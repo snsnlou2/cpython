@@ -1,5 +1,5 @@
-"Test filelist, coverage 19%."
 
+'Test filelist, coverage 19%.'
 from idlelib import filelist
 import unittest
 from test.support import requires
@@ -27,7 +27,5 @@ class FileListTest(unittest.TestCase):
         e = flist.new()
         self.assertEqual(type(e), flist.EditorWindow)
         e._close()
-
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main(verbosity=2)

@@ -1,12 +1,11 @@
+
 from importlib import machinery
 import sys
 import types
 import unittest
-
 from .. import util
 
-
-class SpecLoaderMock:
+class SpecLoaderMock():
 
     def find_spec(self, fullname, path=None, target=None):
         return machinery.ModuleSpec(fullname, self)
@@ -17,22 +16,16 @@ class SpecLoaderMock:
     def exec_module(self, module):
         pass
 
-
-class SpecLoaderAttributeTests:
+class SpecLoaderAttributeTests():
 
     def test___loader__(self):
         loader = SpecLoaderMock()
         with util.uncache('blah'), util.import_state(meta_path=[loader]):
             module = self.__import__('blah')
         self.assertEqual(loader, module.__loader__)
+(Frozen_SpecTests, Source_SpecTests) = util.test_both(SpecLoaderAttributeTests, __import__=util.__import__)
 
-
-(Frozen_SpecTests,
- Source_SpecTests
- ) = util.test_both(SpecLoaderAttributeTests, __import__=util.__import__)
-
-
-class LoaderMock:
+class LoaderMock():
 
     def find_module(self, fullname, path=None):
         return self
@@ -41,8 +34,7 @@ class LoaderMock:
         sys.modules[fullname] = self.module
         return self.module
 
-
-class LoaderAttributeTests:
+class LoaderAttributeTests():
 
     def test___loader___missing(self):
         module = types.ModuleType('blah')
@@ -64,12 +56,6 @@ class LoaderAttributeTests:
         with util.uncache('blah'), util.import_state(meta_path=[loader]):
             returned_module = self.__import__('blah')
         self.assertEqual(loader, module.__loader__)
-
-
-(Frozen_Tests,
- Source_Tests
- ) = util.test_both(LoaderAttributeTests, __import__=util.__import__)
-
-
-if __name__ == '__main__':
+(Frozen_Tests, Source_Tests) = util.test_both(LoaderAttributeTests, __import__=util.__import__)
+if (__name__ == '__main__'):
     unittest.main()

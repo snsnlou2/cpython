@@ -1,12 +1,10 @@
-"Test zoomheight, coverage 66%."
-# Some code is system dependent.
 
+'Test zoomheight, coverage 66%.'
 from idlelib import zoomheight
 import unittest
 from test.support import requires
 from tkinter import Tk
 from idlelib.editor import EditorWindow
-
 
 class Test(unittest.TestCase):
 
@@ -22,7 +20,7 @@ class Test(unittest.TestCase):
         cls.editwin._close()
         cls.root.update_idletasks()
         for id in cls.root.tk.call('after', 'info'):
-            cls.root.after_cancel(id)  # Need for EditorWindow.
+            cls.root.after_cancel(id)
         cls.root.destroy()
         del cls.root
 
@@ -33,7 +31,5 @@ class Test(unittest.TestCase):
     def test_zoom_height_event(self):
         zoom = zoomheight.ZoomHeight(self.editwin)
         zoom.zoom_height_event()
-
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main(verbosity=2)

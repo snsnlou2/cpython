@@ -1,13 +1,10 @@
+
 import os
 import unittest
 from test.support import import_helper
-
-
 spwd = import_helper.import_module('spwd')
 
-
-@unittest.skipUnless(hasattr(os, 'geteuid') and os.geteuid() == 0,
-                     'root privileges required')
+@unittest.skipUnless((hasattr(os, 'geteuid') and (os.geteuid() == 0)), 'root privileges required')
 class TestSpwdRoot(unittest.TestCase):
 
     def test_getspall(self):
@@ -18,7 +15,7 @@ class TestSpwdRoot(unittest.TestCase):
 
     def test_getspnam(self):
         entries = spwd.getspall()
-        if not entries:
+        if (not entries):
             self.skipTest('empty shadow password database')
         random_name = entries[0].sp_namp
         entry = spwd.getspnam(random_name)
@@ -56,9 +53,7 @@ class TestSpwdRoot(unittest.TestCase):
         else:
             self.assertRaises(TypeError, spwd.getspnam, bytes_name)
 
-
-@unittest.skipUnless(hasattr(os, 'geteuid') and os.geteuid() != 0,
-                     'non-root user required')
+@unittest.skipUnless((hasattr(os, 'geteuid') and (os.geteuid() != 0)), 'non-root user required')
 class TestSpwdNonRoot(unittest.TestCase):
 
     def test_getspnam_exception(self):
@@ -67,8 +62,6 @@ class TestSpwdNonRoot(unittest.TestCase):
             with self.assertRaises(PermissionError) as cm:
                 spwd.getspnam(name)
         except KeyError as exc:
-            self.skipTest("spwd entry %r doesn't exist: %s" % (name, exc))
-
-
-if __name__ == "__main__":
+            self.skipTest(("spwd entry %r doesn't exist: %s" % (name, exc)))
+if (__name__ == '__main__'):
     unittest.main()

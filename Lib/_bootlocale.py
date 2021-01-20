@@ -1,13 +1,9 @@
-"""A minimal subset of the locale module used at interpreter startup
-(imported by the _io module), in order to reduce startup time.
 
-Don't import directly from third-party code; use the `locale` module instead!
-"""
-
+"A minimal subset of the locale module used at interpreter startup\n(imported by the _io module), in order to reduce startup time.\n\nDon't import directly from third-party code; use the `locale` module instead!\n"
 import sys
 import _locale
+if sys.platform.startswith('win'):
 
-if sys.platform.startswith("win"):
     def getpreferredencoding(do_setlocale=True):
         if sys.flags.utf8_mode:
             return 'UTF-8'
@@ -17,30 +13,23 @@ else:
         _locale.CODESET
     except AttributeError:
         if hasattr(sys, 'getandroidapilevel'):
-            # On Android langinfo.h and CODESET are missing, and UTF-8 is
-            # always used in mbstowcs() and wcstombs().
+
             def getpreferredencoding(do_setlocale=True):
                 return 'UTF-8'
         else:
+
             def getpreferredencoding(do_setlocale=True):
                 if sys.flags.utf8_mode:
                     return 'UTF-8'
-                # This path for legacy systems needs the more complex
-                # getdefaultlocale() function, import the full locale module.
                 import locale
                 return locale.getpreferredencoding(do_setlocale)
     else:
+
         def getpreferredencoding(do_setlocale=True):
-            assert not do_setlocale
+            assert (not do_setlocale)
             if sys.flags.utf8_mode:
                 return 'UTF-8'
             result = _locale.nl_langinfo(_locale.CODESET)
-            if not result and sys.platform == 'darwin':
-                # nl_langinfo can return an empty string
-                # when the setting has an invalid value.
-                # Default to UTF-8 in that case because
-                # UTF-8 is the default charset on OSX and
-                # returning nothing will crash the
-                # interpreter.
+            if ((not result) and (sys.platform == 'darwin')):
                 result = 'UTF-8'
             return result

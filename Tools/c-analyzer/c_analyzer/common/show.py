@@ -1,7 +1,7 @@
 
-def basic(variables, *,
-          _print=print):
-    """Print each row simply."""
+
+def basic(variables, *, _print=print):
+    'Print each row simply.'
     for var in variables:
         if var.funcname:
             line = f'{var.filename}:{var.funcname}():{var.name}'

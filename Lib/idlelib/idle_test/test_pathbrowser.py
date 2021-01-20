@@ -1,19 +1,16 @@
-"Test pathbrowser, coverage 95%."
 
+'Test pathbrowser, coverage 95%.'
 from idlelib import pathbrowser
 import unittest
 from test.support import requires
 from tkinter import Tk
-
 import os.path
-import pyclbr  # for _modules
-import sys  # for sys.path
-
+import pyclbr
+import sys
 from idlelib.idle_test.mock_idle import Func
-import idlelib  # for __file__
+import idlelib
 from idlelib import browser
 from idlelib.tree import TreeNode
-
 
 class PathBrowserTest(unittest.TestCase):
 
@@ -58,19 +55,15 @@ class PathBrowserTest(unittest.TestCase):
         self.assertTrue(pb.node.destroy.called)
         del pb.top.destroy, pb.node.destroy
 
-
 class DirBrowserTreeItemTest(unittest.TestCase):
 
     def test_DirBrowserTreeItem(self):
-        # Issue16226 - make sure that getting a sublist works
         d = pathbrowser.DirBrowserTreeItem('')
         d.GetSubList()
         self.assertEqual('', d.GetText())
-
         dir = os.path.split(os.path.abspath(idlelib.__file__))[0]
         self.assertEqual(d.ispackagedir(dir), True)
-        self.assertEqual(d.ispackagedir(dir + '/Icons'), False)
-
+        self.assertEqual(d.ispackagedir((dir + '/Icons')), False)
 
 class PathBrowserTreeItemTest(unittest.TestCase):
 
@@ -80,7 +73,5 @@ class PathBrowserTreeItemTest(unittest.TestCase):
         sub = p.GetSubList()
         self.assertEqual(len(sub), len(sys.path))
         self.assertEqual(type(sub[0]), pathbrowser.DirBrowserTreeItem)
-
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main(verbosity=2, exit=False)

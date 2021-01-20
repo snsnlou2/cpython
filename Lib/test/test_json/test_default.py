@@ -1,12 +1,13 @@
+
 from test.test_json import PyTest, CTest
 
+class TestDefault():
 
-class TestDefault:
     def test_default(self):
-        self.assertEqual(
-            self.dumps(type, default=repr),
-            self.dumps(repr(type)))
+        self.assertEqual(self.dumps(type, default=repr), self.dumps(repr(type)))
 
+class TestPyDefault(TestDefault, PyTest):
+    pass
 
-class TestPyDefault(TestDefault, PyTest): pass
-class TestCDefault(TestDefault, CTest): pass
+class TestCDefault(TestDefault, CTest):
+    pass

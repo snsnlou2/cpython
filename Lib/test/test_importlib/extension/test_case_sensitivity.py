@@ -1,24 +1,21 @@
+
 from importlib import _bootstrap_external
 from test.support import os_helper
 import unittest
 import sys
 from .. import util
-
 importlib = util.import_importlib('importlib')
 machinery = util.import_importlib('importlib.machinery')
 
-
-@unittest.skipIf(util.EXTENSIONS.filename is None, '_testcapi not available')
+@unittest.skipIf((util.EXTENSIONS.filename is None), '_testcapi not available')
 @util.case_insensitive_tests
 class ExtensionModuleCaseSensitivityTest(util.CASEOKTestBase):
 
     def find_module(self):
         good_name = util.EXTENSIONS.name
         bad_name = good_name.upper()
-        assert good_name != bad_name
-        finder = self.machinery.FileFinder(util.EXTENSIONS.path,
-                                          (self.machinery.ExtensionFileLoader,
-                                           self.machinery.EXTENSION_SUFFIXES))
+        assert (good_name != bad_name)
+        finder = self.machinery.FileFinder(util.EXTENSIONS.path, (self.machinery.ExtensionFileLoader, self.machinery.EXTENSION_SUFFIXES))
         return finder.find_module(bad_name)
 
     @unittest.skipIf(sys.flags.ignore_environment, 'ignore_environment flag was set')
@@ -36,13 +33,6 @@ class ExtensionModuleCaseSensitivityTest(util.CASEOKTestBase):
             self.caseok_env_changed(should_exist=True)
             loader = self.find_module()
             self.assertTrue(hasattr(loader, 'load_module'))
-
-
-(Frozen_ExtensionCaseSensitivity,
- Source_ExtensionCaseSensitivity
- ) = util.test_both(ExtensionModuleCaseSensitivityTest, importlib=importlib,
-                    machinery=machinery)
-
-
-if __name__ == '__main__':
+(Frozen_ExtensionCaseSensitivity, Source_ExtensionCaseSensitivity) = util.test_both(ExtensionModuleCaseSensitivityTest, importlib=importlib, machinery=machinery)
+if (__name__ == '__main__'):
     unittest.main()

@@ -1,39 +1,27 @@
-"""Implements (a subset of) Sun XDR -- eXternal Data Representation.
 
-See: RFC 1014
-
-"""
-
+'Implements (a subset of) Sun XDR -- eXternal Data Representation.\n\nSee: RFC 1014\n\n'
 import struct
 from io import BytesIO
 from functools import wraps
+__all__ = ['Error', 'Packer', 'Unpacker', 'ConversionError']
 
-__all__ = ["Error", "Packer", "Unpacker", "ConversionError"]
-
-# exceptions
 class Error(Exception):
-    """Exception class for this module. Use:
+    'Exception class for this module. Use:\n\n    except xdrlib.Error as var:\n        # var has the Error instance for the exception\n\n    Public ivars:\n        msg -- contains the message\n\n    '
 
-    except xdrlib.Error as var:
-        # var has the Error instance for the exception
-
-    Public ivars:
-        msg -- contains the message
-
-    """
     def __init__(self, msg):
         self.msg = msg
+
     def __repr__(self):
         return repr(self.msg)
+
     def __str__(self):
         return str(self.msg)
-
 
 class ConversionError(Error):
     pass
 
 def raise_conversion_error(function):
-    """ Wrap any raised struct.errors in a ConversionError. """
+    ' Wrap any raised struct.errors in a ConversionError. '
 
     @wraps(function)
     def result(self, value):
@@ -43,9 +31,8 @@ def raise_conversion_error(function):
             raise ConversionError(e.args[0]) from None
     return result
 
-
-class Packer:
-    """Pack various data representations into a buffer."""
+class Packer():
+    'Pack various data representations into a buffer.'
 
     def __init__(self):
         self.reset()
@@ -55,7 +42,6 @@ class Packer:
 
     def get_buffer(self):
         return self.__buf.getvalue()
-    # backwards compatibility
     get_buf = get_buffer
 
     @raise_conversion_error
@@ -65,23 +51,23 @@ class Packer:
     @raise_conversion_error
     def pack_int(self, x):
         self.__buf.write(struct.pack('>l', x))
-
     pack_enum = pack_int
 
     def pack_bool(self, x):
-        if x: self.__buf.write(b'\0\0\0\1')
-        else: self.__buf.write(b'\0\0\0\0')
+        if x:
+            self.__buf.write(b'\x00\x00\x00\x01')
+        else:
+            self.__buf.write(b'\x00\x00\x00\x00')
 
     def pack_uhyper(self, x):
         try:
-            self.pack_uint(x>>32 & 0xffffffff)
+            self.pack_uint(((x >> 32) & 4294967295))
         except (TypeError, struct.error) as e:
             raise ConversionError(e.args[0]) from None
         try:
-            self.pack_uint(x & 0xffffffff)
+            self.pack_uint((x & 4294967295))
         except (TypeError, struct.error) as e:
             raise ConversionError(e.args[0]) from None
-
     pack_hyper = pack_uhyper
 
     @raise_conversion_error
@@ -93,20 +79,18 @@ class Packer:
         self.__buf.write(struct.pack('>d', x))
 
     def pack_fstring(self, n, s):
-        if n < 0:
+        if (n < 0):
             raise ValueError('fstring size must be nonnegative')
         data = s[:n]
-        n = ((n+3)//4)*4
-        data = data + (n - len(data)) * b'\0'
+        n = (((n + 3) // 4) * 4)
+        data = (data + ((n - len(data)) * b'\x00'))
         self.__buf.write(data)
-
     pack_fopaque = pack_fstring
 
     def pack_string(self, s):
         n = len(s)
         self.pack_uint(n)
         self.pack_fstring(n, s)
-
     pack_opaque = pack_string
     pack_bytes = pack_string
 
@@ -117,7 +101,7 @@ class Packer:
         self.pack_uint(0)
 
     def pack_farray(self, n, list, pack_item):
-        if len(list) != n:
+        if (len(list) != n):
             raise ValueError('wrong array size')
         for item in list:
             pack_item(item)
@@ -127,10 +111,8 @@ class Packer:
         self.pack_uint(n)
         self.pack_farray(n, list, pack_item)
 
-
-
-class Unpacker:
-    """Unpacks various data representations from the given buffer."""
+class Unpacker():
+    'Unpacks various data representations from the given buffer.'
 
     def __init__(self, data):
         self.reset(data)
@@ -149,25 +131,24 @@ class Unpacker:
         return self.__buf
 
     def done(self):
-        if self.__pos < len(self.__buf):
+        if (self.__pos < len(self.__buf)):
             raise Error('unextracted data remains')
 
     def unpack_uint(self):
         i = self.__pos
-        self.__pos = j = i+4
+        self.__pos = j = (i + 4)
         data = self.__buf[i:j]
-        if len(data) < 4:
+        if (len(data) < 4):
             raise EOFError
         return struct.unpack('>L', data)[0]
 
     def unpack_int(self):
         i = self.__pos
-        self.__pos = j = i+4
+        self.__pos = j = (i + 4)
         data = self.__buf[i:j]
-        if len(data) < 4:
+        if (len(data) < 4):
             raise EOFError
         return struct.unpack('>l', data)[0]
-
     unpack_enum = unpack_int
 
     def unpack_bool(self):
@@ -176,46 +157,44 @@ class Unpacker:
     def unpack_uhyper(self):
         hi = self.unpack_uint()
         lo = self.unpack_uint()
-        return int(hi)<<32 | lo
+        return ((int(hi) << 32) | lo)
 
     def unpack_hyper(self):
         x = self.unpack_uhyper()
-        if x >= 0x8000000000000000:
-            x = x - 0x10000000000000000
+        if (x >= 9223372036854775808):
+            x = (x - 18446744073709551616)
         return x
 
     def unpack_float(self):
         i = self.__pos
-        self.__pos = j = i+4
+        self.__pos = j = (i + 4)
         data = self.__buf[i:j]
-        if len(data) < 4:
+        if (len(data) < 4):
             raise EOFError
         return struct.unpack('>f', data)[0]
 
     def unpack_double(self):
         i = self.__pos
-        self.__pos = j = i+8
+        self.__pos = j = (i + 8)
         data = self.__buf[i:j]
-        if len(data) < 8:
+        if (len(data) < 8):
             raise EOFError
         return struct.unpack('>d', data)[0]
 
     def unpack_fstring(self, n):
-        if n < 0:
+        if (n < 0):
             raise ValueError('fstring size must be nonnegative')
         i = self.__pos
-        j = i + (n+3)//4*4
-        if j > len(self.__buf):
+        j = (i + (((n + 3) // 4) * 4))
+        if (j > len(self.__buf)):
             raise EOFError
         self.__pos = j
-        return self.__buf[i:i+n]
-
+        return self.__buf[i:(i + n)]
     unpack_fopaque = unpack_fstring
 
     def unpack_string(self):
         n = self.unpack_uint()
         return self.unpack_fstring(n)
-
     unpack_opaque = unpack_string
     unpack_bytes = unpack_string
 
@@ -223,9 +202,10 @@ class Unpacker:
         list = []
         while 1:
             x = self.unpack_uint()
-            if x == 0: break
-            if x != 1:
-                raise ConversionError('0 or 1 expected, got %r' % (x,))
+            if (x == 0):
+                break
+            if (x != 1):
+                raise ConversionError(('0 or 1 expected, got %r' % (x,)))
             item = unpack_item()
             list.append(item)
         return list

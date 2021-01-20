@@ -1,11 +1,10 @@
-"Test , coverage 17%."
 
+'Test , coverage 17%.'
 from idlelib import iomenu
 import unittest
 from test.support import requires
 from tkinter import Tk
 from idlelib.editor import EditorWindow
-
 
 class IOBindingTest(unittest.TestCase):
 
@@ -24,7 +23,7 @@ class IOBindingTest(unittest.TestCase):
         del cls.editwin
         cls.root.update_idletasks()
         for id in cls.root.tk.call('after', 'info'):
-            cls.root.after_cancel(id)  # Need for EditorWindow.
+            cls.root.after_cancel(id)
         cls.root.destroy()
         del cls.root
 
@@ -40,10 +39,8 @@ class IOBindingTest(unittest.TestCase):
         eq(fix(), '')
         del self.editwin.interp
         text.insert(1.0, 'a')
-        eq(fix(), 'a'+io.eol_convention)
+        eq(fix(), ('a' + io.eol_convention))
         eq(text.get('1.0', 'end-1c'), 'a\n')
-        eq(fix(), 'a'+io.eol_convention)
-
-
-if __name__ == '__main__':
+        eq(fix(), ('a' + io.eol_convention))
+if (__name__ == '__main__'):
     unittest.main(verbosity=2)

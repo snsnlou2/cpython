@@ -1,3 +1,4 @@
+
 import imghdr
 import io
 import os
@@ -6,25 +7,10 @@ import unittest
 import warnings
 from test.support import findfile
 from test.support.os_helper import TESTFN, unlink
-
-
-TEST_FILES = (
-    ('python.png', 'png'),
-    ('python.gif', 'gif'),
-    ('python.bmp', 'bmp'),
-    ('python.ppm', 'ppm'),
-    ('python.pgm', 'pgm'),
-    ('python.pbm', 'pbm'),
-    ('python.jpg', 'jpeg'),
-    ('python.ras', 'rast'),
-    ('python.sgi', 'rgb'),
-    ('python.tiff', 'tiff'),
-    ('python.xbm', 'xbm'),
-    ('python.webp', 'webp'),
-    ('python.exr', 'exr'),
-)
+TEST_FILES = (('python.png', 'png'), ('python.gif', 'gif'), ('python.bmp', 'bmp'), ('python.ppm', 'ppm'), ('python.pgm', 'pgm'), ('python.pbm', 'pbm'), ('python.jpg', 'jpeg'), ('python.ras', 'rast'), ('python.sgi', 'rgb'), ('python.tiff', 'tiff'), ('python.xbm', 'xbm'), ('python.webp', 'webp'), ('python.exr', 'exr'))
 
 class UnseekableIO(io.FileIO):
+
     def tell(self):
         raise io.UnsupportedOperation
 
@@ -32,6 +18,7 @@ class UnseekableIO(io.FileIO):
         raise io.UnsupportedOperation
 
 class TestImghdr(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         cls.testfile = findfile('python.png', subdir='imghdrdata')
@@ -42,7 +29,7 @@ class TestImghdr(unittest.TestCase):
         unlink(TESTFN)
 
     def test_data(self):
-        for filename, expected in TEST_FILES:
+        for (filename, expected) in TEST_FILES:
             filename = findfile(filename, subdir='imghdrdata')
             self.assertEqual(imghdr.what(filename), expected)
             with open(filename, 'rb') as stream:
@@ -53,12 +40,13 @@ class TestImghdr(unittest.TestCase):
             self.assertEqual(imghdr.what(None, bytearray(data)), expected)
 
     def test_pathlike_filename(self):
-        for filename, expected in TEST_FILES:
+        for (filename, expected) in TEST_FILES:
             with self.subTest(filename=filename):
                 filename = findfile(filename, subdir='imghdrdata')
                 self.assertEqual(imghdr.what(pathlib.Path(filename)), expected)
 
     def test_register_test(self):
+
         def test_jumbo(h, file):
             if h.startswith(b'eggs'):
                 return 'ham'
@@ -90,18 +78,13 @@ class TestImghdr(unittest.TestCase):
                 imghdr.what(f.fileno())
 
     def test_invalid_headers(self):
-        for header in (b'\211PN\r\n',
-                       b'\001\331',
-                       b'\x59\xA6',
-                       b'cutecat',
-                       b'000000JFI',
-                       b'GIF80'):
+        for header in (b'\x89PN\r\n', b'\x01\xd9', b'Y\xa6', b'cutecat', b'000000JFI', b'GIF80'):
             self.assertIsNone(imghdr.what(None, header))
 
     def test_string_data(self):
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore", BytesWarning)
-            for filename, _ in TEST_FILES:
+            warnings.simplefilter('ignore', BytesWarning)
+            for (filename, _) in TEST_FILES:
                 filename = findfile(filename, subdir='imghdrdata')
                 with open(filename, 'rb') as stream:
                     data = stream.read().decode('latin1')
@@ -137,6 +120,5 @@ class TestImghdr(unittest.TestCase):
             stream.seek(0)
             with self.assertRaises(OSError) as cm:
                 imghdr.what(stream)
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main()

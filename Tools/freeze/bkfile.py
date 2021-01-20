@@ -1,10 +1,11 @@
+
 from builtins import open as _orig_open
 
-def open(file, mode='r', bufsize=-1):
-    if 'w' not in mode:
+def open(file, mode='r', bufsize=(- 1)):
+    if ('w' not in mode):
         return _orig_open(file, mode, bufsize)
     import os
-    backup = file + '~'
+    backup = (file + '~')
     try:
         os.unlink(backup)
     except OSError:
@@ -15,6 +16,7 @@ def open(file, mode='r', bufsize=-1):
         return _orig_open(file, mode, bufsize)
     f = _orig_open(file, mode, bufsize)
     _orig_close = f.close
+
     def close():
         _orig_close()
         import filecmp

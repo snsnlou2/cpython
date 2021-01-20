@@ -1,11 +1,9 @@
-# Test specifically-sized containers.
 
 from ctypes import *
-
 import unittest
 
-
 class SizesTestCase(unittest.TestCase):
+
     def test_8(self):
         self.assertEqual(1, sizeof(c_int8))
         self.assertEqual(1, sizeof(c_uint8))
@@ -27,7 +25,5 @@ class SizesTestCase(unittest.TestCase):
 
     def test_ssize_t(self):
         self.assertEqual(sizeof(c_void_p), sizeof(c_ssize_t))
-
-
-if __name__ == "__main__":
+if (__name__ == '__main__'):
     unittest.main()

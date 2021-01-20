@@ -1,43 +1,38 @@
+
 import unittest
 
-
 class TestEquality(object):
-    """Used as a mixin for TestCase"""
+    'Used as a mixin for TestCase'
 
-    # Check for a valid __eq__ implementation
     def test_eq(self):
-        for obj_1, obj_2 in self.eq_pairs:
+        for (obj_1, obj_2) in self.eq_pairs:
             self.assertEqual(obj_1, obj_2)
             self.assertEqual(obj_2, obj_1)
 
-    # Check for a valid __ne__ implementation
     def test_ne(self):
-        for obj_1, obj_2 in self.ne_pairs:
+        for (obj_1, obj_2) in self.ne_pairs:
             self.assertNotEqual(obj_1, obj_2)
             self.assertNotEqual(obj_2, obj_1)
 
 class TestHashing(object):
-    """Used as a mixin for TestCase"""
+    'Used as a mixin for TestCase'
 
-    # Check for a valid __hash__ implementation
     def test_hash(self):
-        for obj_1, obj_2 in self.eq_pairs:
+        for (obj_1, obj_2) in self.eq_pairs:
             try:
-                if not hash(obj_1) == hash(obj_2):
-                    self.fail("%r and %r do not hash equal" % (obj_1, obj_2))
+                if (not (hash(obj_1) == hash(obj_2))):
+                    self.fail(('%r and %r do not hash equal' % (obj_1, obj_2)))
             except Exception as e:
-                self.fail("Problem hashing %r and %r: %s" % (obj_1, obj_2, e))
-
-        for obj_1, obj_2 in self.ne_pairs:
+                self.fail(('Problem hashing %r and %r: %s' % (obj_1, obj_2, e)))
+        for (obj_1, obj_2) in self.ne_pairs:
             try:
-                if hash(obj_1) == hash(obj_2):
-                    self.fail("%s and %s hash equal, but shouldn't" %
-                              (obj_1, obj_2))
+                if (hash(obj_1) == hash(obj_2)):
+                    self.fail(("%s and %s hash equal, but shouldn't" % (obj_1, obj_2)))
             except Exception as e:
-                self.fail("Problem hashing %s and %s: %s" % (obj_1, obj_2, e))
-
+                self.fail(('Problem hashing %s and %s: %s' % (obj_1, obj_2, e)))
 
 class _BaseLoggingResult(unittest.TestResult):
+
     def __init__(self, log):
         self._events = log
         super().__init__()
@@ -82,33 +77,25 @@ class _BaseLoggingResult(unittest.TestResult):
         self._events.append('addUnexpectedSuccess')
         super().addUnexpectedSuccess(*args)
 
-
 class LegacyLoggingResult(_BaseLoggingResult):
-    """
-    A legacy TestResult implementation, without an addSubTest method,
-    which records its method calls.
-    """
+    '\n    A legacy TestResult implementation, without an addSubTest method,\n    which records its method calls.\n    '
 
     @property
     def addSubTest(self):
         raise AttributeError
 
-
 class LoggingResult(_BaseLoggingResult):
-    """
-    A TestResult implementation which records its method calls.
-    """
+    '\n    A TestResult implementation which records its method calls.\n    '
 
     def addSubTest(self, test, subtest, err):
-        if err is None:
+        if (err is None):
             self._events.append('addSubTestSuccess')
         else:
             self._events.append('addSubTestFailure')
         super().addSubTest(test, subtest, err)
 
-
 class ResultWithNoStartTestRunStopTestRun(object):
-    """An object honouring TestResult before startTestRun/stopTestRun."""
+    'An object honouring TestResult before startTestRun/stopTestRun.'
 
     def __init__(self):
         self.failures = []

@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
 
-"""
-Markov chain simulation of words or characters.
-"""
+'\nMarkov chain simulation of words or characters.\n'
 
-class Markov:
+class Markov():
+
     def __init__(self, histsize, choice):
         self.histsize = histsize
         self.choice = choice
@@ -18,8 +16,8 @@ class Markov:
         add = self.add
         add(None, seq[:0])
         for i in range(len(seq)):
-            add(seq[max(0, i-n):i], seq[i:i+1])
-        add(seq[len(seq)-n:], None)
+            add(seq[max(0, (i - n)):i], seq[i:(i + 1)])
+        add(seq[(len(seq) - n):], None)
 
     def get(self):
         choice = self.choice
@@ -27,22 +25,21 @@ class Markov:
         n = self.histsize
         seq = choice(trans[None])
         while True:
-            subseq = seq[max(0, len(seq)-n):]
+            subseq = seq[max(0, (len(seq) - n)):]
             options = trans[subseq]
             next = choice(options)
-            if not next:
+            if (not next):
                 break
             seq += next
         return seq
-
 
 def test():
     import sys, random, getopt
     args = sys.argv[1:]
     try:
-        opts, args = getopt.getopt(args, '0123456789cdwq')
+        (opts, args) = getopt.getopt(args, '0123456789cdwq')
     except getopt.error:
-        print('Usage: %s [-#] [-cddqw] [file] ...' % sys.argv[0])
+        print(('Usage: %s [-#] [-cddqw] [file] ...' % sys.argv[0]))
         print('Options:')
         print('-#: 1-digit history size (default 2)')
         print('-c: characters (default)')
@@ -59,19 +56,23 @@ def test():
     histsize = 2
     do_words = False
     debug = 1
-    for o, a in opts:
-        if '-0' <= o <= '-9': histsize = int(o[1:])
-        if o == '-c': do_words = False
-        if o == '-d': debug += 1
-        if o == '-q': debug = 0
-        if o == '-w': do_words = True
-    if not args:
+    for (o, a) in opts:
+        if ('-0' <= o <= '-9'):
+            histsize = int(o[1:])
+        if (o == '-c'):
+            do_words = False
+        if (o == '-d'):
+            debug += 1
+        if (o == '-q'):
+            debug = 0
+        if (o == '-w'):
+            do_words = True
+    if (not args):
         args = ['-']
-
     m = Markov(histsize, random.choice)
     try:
         for filename in args:
-            if filename == '-':
+            if (filename == '-'):
                 f = sys.stdin
                 if f.isatty():
                     print('Sorry, need stdin from file')
@@ -79,11 +80,13 @@ def test():
             else:
                 f = open(filename, 'r')
             with f:
-                if debug: print('processing', filename, '...')
+                if debug:
+                    print('processing', filename, '...')
                 text = f.read()
             paralist = text.split('\n\n')
             for para in paralist:
-                if debug > 1: print('feeding ...')
+                if (debug > 1):
+                    print('feeding ...')
                 words = para.split()
                 if words:
                     if do_words:
@@ -93,16 +96,17 @@ def test():
                     m.put(data)
     except KeyboardInterrupt:
         print('Interrupted -- continue with data read so far')
-    if not m.trans:
+    if (not m.trans):
         print('No valid input files')
         return
-    if debug: print('done.')
-
-    if debug > 1:
+    if debug:
+        print('done.')
+    if (debug > 1):
         for key in m.trans.keys():
-            if key is None or len(key) < histsize:
+            if ((key is None) or (len(key) < histsize)):
                 print(repr(key), m.trans[key])
-        if histsize == 0: print(repr(''), m.trans[''])
+        if (histsize == 0):
+            print(repr(''), m.trans[''])
         print()
     while True:
         data = m.get()
@@ -113,13 +117,12 @@ def test():
         n = 0
         limit = 72
         for w in words:
-            if n + len(w) > limit:
+            if ((n + len(w)) > limit):
                 print()
                 n = 0
             print(w, end=' ')
-            n += len(w) + 1
+            n += (len(w) + 1)
         print()
         print()
-
-if __name__ == "__main__":
+if (__name__ == '__main__'):
     test()

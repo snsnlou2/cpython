@@ -1,16 +1,17 @@
+
 import asyncio
 import unittest
-
 
 def tearDownModule():
     asyncio.set_event_loop_policy(None)
 
-
 class TestAsyncCase(unittest.TestCase):
+
     def test_full_cycle(self):
         events = []
 
         class Test(unittest.IsolatedAsyncioTestCase):
+
             def setUp(self):
                 self.assertEqual(events, [])
                 events.append('setUp')
@@ -20,45 +21,30 @@ class TestAsyncCase(unittest.TestCase):
                 events.append('asyncSetUp')
 
             async def test_func(self):
-                self.assertEqual(events, ['setUp',
-                                          'asyncSetUp'])
+                self.assertEqual(events, ['setUp', 'asyncSetUp'])
                 events.append('test')
                 self.addAsyncCleanup(self.on_cleanup)
 
             async def asyncTearDown(self):
-                self.assertEqual(events, ['setUp',
-                                          'asyncSetUp',
-                                          'test'])
+                self.assertEqual(events, ['setUp', 'asyncSetUp', 'test'])
                 events.append('asyncTearDown')
 
             def tearDown(self):
-                self.assertEqual(events, ['setUp',
-                                          'asyncSetUp',
-                                          'test',
-                                          'asyncTearDown'])
+                self.assertEqual(events, ['setUp', 'asyncSetUp', 'test', 'asyncTearDown'])
                 events.append('tearDown')
 
             async def on_cleanup(self):
-                self.assertEqual(events, ['setUp',
-                                          'asyncSetUp',
-                                          'test',
-                                          'asyncTearDown',
-                                          'tearDown'])
+                self.assertEqual(events, ['setUp', 'asyncSetUp', 'test', 'asyncTearDown', 'tearDown'])
                 events.append('cleanup')
-
-        test = Test("test_func")
+        test = Test('test_func')
         test.run()
-        self.assertEqual(events, ['setUp',
-                                  'asyncSetUp',
-                                  'test',
-                                  'asyncTearDown',
-                                  'tearDown',
-                                  'cleanup'])
+        self.assertEqual(events, ['setUp', 'asyncSetUp', 'test', 'asyncTearDown', 'tearDown', 'cleanup'])
 
     def test_exception_in_setup(self):
         events = []
 
         class Test(unittest.IsolatedAsyncioTestCase):
+
             async def asyncSetUp(self):
                 events.append('asyncSetUp')
                 raise Exception()
@@ -72,9 +58,7 @@ class TestAsyncCase(unittest.TestCase):
 
             async def on_cleanup(self):
                 events.append('cleanup')
-
-
-        test = Test("test_func")
+        test = Test('test_func')
         test.run()
         self.assertEqual(events, ['asyncSetUp'])
 
@@ -82,6 +66,7 @@ class TestAsyncCase(unittest.TestCase):
         events = []
 
         class Test(unittest.IsolatedAsyncioTestCase):
+
             async def asyncSetUp(self):
                 events.append('asyncSetUp')
 
@@ -95,8 +80,7 @@ class TestAsyncCase(unittest.TestCase):
 
             async def on_cleanup(self):
                 events.append('cleanup')
-
-        test = Test("test_func")
+        test = Test('test_func')
         test.run()
         self.assertEqual(events, ['asyncSetUp', 'test', 'asyncTearDown'])
 
@@ -104,6 +88,7 @@ class TestAsyncCase(unittest.TestCase):
         events = []
 
         class Test(unittest.IsolatedAsyncioTestCase):
+
             async def asyncSetUp(self):
                 events.append('asyncSetUp')
 
@@ -117,8 +102,7 @@ class TestAsyncCase(unittest.TestCase):
 
             async def on_cleanup(self):
                 events.append('cleanup')
-
-        test = Test("test_func")
+        test = Test('test_func')
         test.run()
         self.assertEqual(events, ['asyncSetUp', 'test', 'asyncTearDown', 'cleanup'])
 
@@ -126,6 +110,7 @@ class TestAsyncCase(unittest.TestCase):
         events = []
 
         class Test(unittest.IsolatedAsyncioTestCase):
+
             async def asyncSetUp(self):
                 events.append('asyncSetUp')
 
@@ -139,16 +124,15 @@ class TestAsyncCase(unittest.TestCase):
 
             async def on_cleanup(self):
                 events.append('cleanup')
-
-        test = Test("test_func")
+        test = Test('test_func')
         test.run()
         self.assertEqual(events, ['asyncSetUp', 'test', 'asyncTearDown', 'cleanup'])
-
 
     def test_exception_in_tear_clean_up(self):
         events = []
 
         class Test(unittest.IsolatedAsyncioTestCase):
+
             async def asyncSetUp(self):
                 events.append('asyncSetUp')
 
@@ -162,8 +146,7 @@ class TestAsyncCase(unittest.TestCase):
             async def on_cleanup(self):
                 events.append('cleanup')
                 raise Exception()
-
-        test = Test("test_func")
+        test = Test('test_func')
         test.run()
         self.assertEqual(events, ['asyncSetUp', 'test', 'asyncTearDown', 'cleanup'])
 
@@ -171,6 +154,7 @@ class TestAsyncCase(unittest.TestCase):
         events = []
 
         class Test(unittest.IsolatedAsyncioTestCase):
+
             async def test_func(self):
                 self.addAsyncCleanup(self.on_sync_cleanup, 1)
                 self.addAsyncCleanup(self.on_async_cleanup, 2)
@@ -182,14 +166,8 @@ class TestAsyncCase(unittest.TestCase):
 
             async def on_async_cleanup(self, val):
                 events.append(f'async_cleanup {val}')
-
-        test = Test("test_func")
+        test = Test('test_func')
         test.run()
-        self.assertEqual(events, ['async_cleanup 4',
-                                  'sync_cleanup 3',
-                                  'async_cleanup 2',
-                                  'sync_cleanup 1'])
-
-
-if __name__ == "__main__":
+        self.assertEqual(events, ['async_cleanup 4', 'sync_cleanup 3', 'async_cleanup 2', 'sync_cleanup 1'])
+if (__name__ == '__main__'):
     unittest.main()

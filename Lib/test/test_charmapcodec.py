@@ -1,31 +1,18 @@
-""" Python character mapping codec test
 
-This uses the test codec in testcodec.py and thus also tests the
-encodings package lookup scheme.
-
-Written by Marc-Andre Lemburg (mal@lemburg.com).
-
-(c) Copyright 2000 Guido van Rossum.
-
-"""#"
-
+' Python character mapping codec test\n\nThis uses the test codec in testcodec.py and thus also tests the\nencodings package lookup scheme.\n\nWritten by Marc-Andre Lemburg (mal@lemburg.com).\n\n(c) Copyright 2000 Guido van Rossum.\n\n'
 import unittest
-
 import codecs
 
-# Register a search function which knows about our codec
 def codec_search_function(encoding):
-    if encoding == 'testcodec':
+    if (encoding == 'testcodec'):
         from test import testcodec
         return tuple(testcodec.getregentry())
     return None
-
 codecs.register(codec_search_function)
-
-# test codec's name (see test/testcodec.py)
 codecname = 'testcodec'
 
 class CharmapCodecTest(unittest.TestCase):
+
     def test_constructorx(self):
         self.assertEqual(str(b'abc', codecname), 'abc')
         self.assertEqual(str(b'xdef', codecname), 'abcdef')
@@ -47,7 +34,6 @@ class CharmapCodecTest(unittest.TestCase):
         self.assertEqual(str(b'dyfy', codecname), 'df')
 
     def test_maptoundefined(self):
-        self.assertRaises(UnicodeError, str, b'abc\001', codecname)
-
-if __name__ == "__main__":
+        self.assertRaises(UnicodeError, str, b'abc\x01', codecname)
+if (__name__ == '__main__'):
     unittest.main()

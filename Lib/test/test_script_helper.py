@@ -1,12 +1,11 @@
-"""Unittests for test.support.script_helper.  Who tests the test helper?"""
 
+'Unittests for test.support.script_helper.  Who tests the test helper?'
 import subprocess
 import sys
 import os
 from test.support import script_helper
 import unittest
 from unittest import mock
-
 
 class TestScriptHelper(unittest.TestCase):
 
@@ -15,12 +14,10 @@ class TestScriptHelper(unittest.TestCase):
         self.assertEqual(0, t[0], 'return code was not 0')
 
     def test_assert_python_failure(self):
-        # I didn't import the sys module so this child will fail.
-        rc, out, err = script_helper.assert_python_failure('-c', 'sys.exit(0)')
+        (rc, out, err) = script_helper.assert_python_failure('-c', 'sys.exit(0)')
         self.assertNotEqual(0, rc, 'return code should not be 0')
 
     def test_assert_python_ok_raises(self):
-        # I didn't import the sys module so this child will fail.
         with self.assertRaises(AssertionError) as error_context:
             script_helper.assert_python_ok('-c', 'sys.exit(0)')
         error_msg = str(error_context.exception)
@@ -32,14 +29,11 @@ class TestScriptHelper(unittest.TestCase):
             script_helper.assert_python_failure('-c', 'import sys; sys.exit(0)')
         error_msg = str(error_context.exception)
         self.assertIn('Process return code is 0\n', error_msg)
-        self.assertIn('import sys; sys.exit(0)', error_msg,
-                      msg='unexpected command line.')
+        self.assertIn('import sys; sys.exit(0)', error_msg, msg='unexpected command line.')
 
     @mock.patch('subprocess.Popen')
     def test_assert_python_isolated_when_env_not_required(self, mock_popen):
-        with mock.patch.object(script_helper,
-                               'interpreter_requires_environment',
-                               return_value=False) as mock_ire_func:
+        with mock.patch.object(script_helper, 'interpreter_requires_environment', return_value=False) as mock_ire_func:
             mock_popen.side_effect = RuntimeError('bail out of unittest')
             try:
                 script_helper._assert_python(True, '-c', 'None')
@@ -51,14 +45,12 @@ class TestScriptHelper(unittest.TestCase):
             self.assertEqual(sys.executable, popen_command[0])
             self.assertIn('None', popen_command)
             self.assertIn('-I', popen_command)
-            self.assertNotIn('-E', popen_command)  # -I overrides this
+            self.assertNotIn('-E', popen_command)
 
     @mock.patch('subprocess.Popen')
     def test_assert_python_not_isolated_when_env_is_required(self, mock_popen):
-        """Ensure that -I is not passed when the environment is required."""
-        with mock.patch.object(script_helper,
-                               'interpreter_requires_environment',
-                               return_value=True) as mock_ire_func:
+        'Ensure that -I is not passed when the environment is required.'
+        with mock.patch.object(script_helper, 'interpreter_requires_environment', return_value=True) as mock_ire_func:
             mock_popen.side_effect = RuntimeError('bail out of unittest')
             try:
                 script_helper._assert_python(True, '-c', 'None')
@@ -68,18 +60,14 @@ class TestScriptHelper(unittest.TestCase):
             self.assertNotIn('-I', popen_command)
             self.assertNotIn('-E', popen_command)
 
-
 class TestScriptHelperEnvironment(unittest.TestCase):
-    """Code coverage for interpreter_requires_environment()."""
+    'Code coverage for interpreter_requires_environment().'
 
     def setUp(self):
-        self.assertTrue(
-            hasattr(script_helper, '__cached_interp_requires_environment'))
-        # Reset the private cached state.
+        self.assertTrue(hasattr(script_helper, '__cached_interp_requires_environment'))
         script_helper.__dict__['__cached_interp_requires_environment'] = None
 
     def tearDown(self):
-        # Reset the private cached state.
         script_helper.__dict__['__cached_interp_requires_environment'] = None
 
     @mock.patch('subprocess.check_call')
@@ -95,7 +83,6 @@ class TestScriptHelperEnvironment(unittest.TestCase):
     def test_interpreter_requires_environment_false(self, mock_check_call):
         with mock.patch.dict(os.environ):
             os.environ.pop('PYTHONHOME', None)
-            # The mocked subprocess.check_call fakes a no-error process.
             script_helper.interpreter_requires_environment()
             self.assertFalse(script_helper.interpreter_requires_environment())
             self.assertEqual(1, mock_check_call.call_count)
@@ -119,7 +106,5 @@ class TestScriptHelperEnvironment(unittest.TestCase):
             self.assertTrue(script_helper.interpreter_requires_environment())
             self.assertTrue(script_helper.interpreter_requires_environment())
             self.assertEqual(0, mock_check_call.call_count)
-
-
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     unittest.main()

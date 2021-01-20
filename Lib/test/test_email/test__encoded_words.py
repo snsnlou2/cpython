@@ -1,13 +1,13 @@
+
 import unittest
 from email import _encoded_words as _ew
 from email import errors
 from test.test_email import TestEmailBase
 
-
 class TestDecodeQ(TestEmailBase):
 
     def _test(self, source, ex_result, ex_defects=[]):
-        result, defects = _ew.decode_q(source)
+        (result, defects) = _ew.decode_q(source)
         self.assertEqual(result, ex_result)
         self.assertDefectsEqual(defects, ex_defects)
 
@@ -21,11 +21,10 @@ class TestDecodeQ(TestEmailBase):
     def test_run_of_encoded(self):
         self._test(b'foo=20=20=21=2Cbar', b'foo  !,bar')
 
-
 class TestDecodeB(TestEmailBase):
 
     def _test(self, source, ex_result, ex_defects=[]):
-        result, defects = _ew.decode_b(source)
+        (result, defects) = _ew.decode_b(source)
         self.assertEqual(result, ex_result)
         self.assertDefectsEqual(defects, ex_defects)
 
@@ -33,21 +32,17 @@ class TestDecodeB(TestEmailBase):
         self._test(b'Zm9v', b'foo')
 
     def test_missing_padding(self):
-        # 1 missing padding character
         self._test(b'dmk', b'vi', [errors.InvalidBase64PaddingDefect])
-        # 2 missing padding characters
         self._test(b'dg', b'v', [errors.InvalidBase64PaddingDefect])
 
     def test_invalid_character(self):
         self._test(b'dm\x01k===', b'vi', [errors.InvalidBase64CharactersDefect])
 
     def test_invalid_character_and_bad_padding(self):
-        self._test(b'dm\x01k', b'vi', [errors.InvalidBase64CharactersDefect,
-                                       errors.InvalidBase64PaddingDefect])
+        self._test(b'dm\x01k', b'vi', [errors.InvalidBase64CharactersDefect, errors.InvalidBase64PaddingDefect])
 
     def test_invalid_length(self):
         self._test(b'abcde', b'abcde', [errors.InvalidBase64LengthDefect])
-
 
 class TestDecode(TestEmailBase):
 
@@ -62,7 +57,7 @@ class TestDecode(TestEmailBase):
             _ew.decode('=?utf-8?X?somevalue?=')
 
     def _test(self, source, result, charset='us-ascii', lang='', defects=[]):
-        res, char, l, d = _ew.decode(source)
+        (res, char, l, d) = _ew.decode(source)
         self.assertEqual(res, result)
         self.assertEqual(char, charset)
         self.assertEqual(l, lang)
@@ -84,57 +79,31 @@ class TestDecode(TestEmailBase):
         self._test('=?latin-1?q?=20F=fcr=20Elise=20?=', ' Für Elise ', 'latin-1')
 
     def test_q_escaped_bytes_preserved(self):
-        self._test(b'=?us-ascii?q?=20\xACfoo?='.decode('us-ascii',
-                                                       'surrogateescape'),
-                   ' \uDCACfoo',
-                   defects = [errors.UndecodableBytesDefect])
+        self._test(b'=?us-ascii?q?=20\xacfoo?='.decode('us-ascii', 'surrogateescape'), ' \udcacfoo', defects=[errors.UndecodableBytesDefect])
 
     def test_b_undecodable_bytes_ignored_with_defect(self):
-        self._test(b'=?us-ascii?b?dm\xACk?='.decode('us-ascii',
-                                                   'surrogateescape'),
-                   'vi',
-                   defects = [
-                    errors.InvalidBase64CharactersDefect,
-                    errors.InvalidBase64PaddingDefect])
+        self._test(b'=?us-ascii?b?dm\xack?='.decode('us-ascii', 'surrogateescape'), 'vi', defects=[errors.InvalidBase64CharactersDefect, errors.InvalidBase64PaddingDefect])
 
     def test_b_invalid_bytes_ignored_with_defect(self):
-        self._test('=?us-ascii?b?dm\x01k===?=',
-                   'vi',
-                   defects = [errors.InvalidBase64CharactersDefect])
+        self._test('=?us-ascii?b?dm\x01k===?=', 'vi', defects=[errors.InvalidBase64CharactersDefect])
 
     def test_b_invalid_bytes_incorrect_padding(self):
-        self._test('=?us-ascii?b?dm\x01k?=',
-                   'vi',
-                   defects = [
-                    errors.InvalidBase64CharactersDefect,
-                    errors.InvalidBase64PaddingDefect])
+        self._test('=?us-ascii?b?dm\x01k?=', 'vi', defects=[errors.InvalidBase64CharactersDefect, errors.InvalidBase64PaddingDefect])
 
     def test_b_padding_defect(self):
-        self._test('=?us-ascii?b?dmk?=',
-                   'vi',
-                    defects = [errors.InvalidBase64PaddingDefect])
+        self._test('=?us-ascii?b?dmk?=', 'vi', defects=[errors.InvalidBase64PaddingDefect])
 
     def test_nonnull_lang(self):
         self._test('=?us-ascii*jive?q?test?=', 'test', lang='jive')
 
     def test_unknown_8bit_charset(self):
-        self._test('=?unknown-8bit?q?foo=ACbar?=',
-                   b'foo\xacbar'.decode('ascii', 'surrogateescape'),
-                   charset = 'unknown-8bit',
-                   defects = [])
+        self._test('=?unknown-8bit?q?foo=ACbar?=', b'foo\xacbar'.decode('ascii', 'surrogateescape'), charset='unknown-8bit', defects=[])
 
     def test_unknown_charset(self):
-        self._test('=?foobar?q?foo=ACbar?=',
-                   b'foo\xacbar'.decode('ascii', 'surrogateescape'),
-                   charset = 'foobar',
-                   # XXX Should this be a new Defect instead?
-                   defects = [errors.CharsetError])
+        self._test('=?foobar?q?foo=ACbar?=', b'foo\xacbar'.decode('ascii', 'surrogateescape'), charset='foobar', defects=[errors.CharsetError])
 
     def test_q_nonascii(self):
-        self._test('=?utf-8?q?=C3=89ric?=',
-                   'Éric',
-                   charset='utf-8')
-
+        self._test('=?utf-8?q?=C3=89ric?=', 'Éric', charset='utf-8')
 
 class TestEncodeQ(TestEmailBase):
 
@@ -150,7 +119,6 @@ class TestEncodeQ(TestEmailBase):
     def test_run_of_encodables(self):
         self._test(b'foo  ,,bar', 'foo__=2C=2Cbar')
 
-
 class TestEncodeB(TestEmailBase):
 
     def test_simple(self):
@@ -158,7 +126,6 @@ class TestEncodeB(TestEmailBase):
 
     def test_padding(self):
         self.assertEqual(_ew.encode_b(b'vi'), 'dmk=')
-
 
 class TestEncode(TestEmailBase):
 
@@ -178,12 +145,10 @@ class TestEncode(TestEmailBase):
         self.assertEqual(_ew.encode('.....', 'utf-8'), '=?utf-8?b?Li4uLi4=?=')
 
     def test_auto_b_if_long_unsafe(self):
-        self.assertEqual(_ew.encode('vi.vi.vi.vi.vi.', 'utf-8'),
-                         '=?utf-8?b?dmkudmkudmkudmkudmku?=')
+        self.assertEqual(_ew.encode('vi.vi.vi.vi.vi.', 'utf-8'), '=?utf-8?b?dmkudmkudmkudmkudmku?=')
 
     def test_auto_q_if_long_mostly_safe(self):
-        self.assertEqual(_ew.encode('vi vi vi.vi ', 'utf-8'),
-                         '=?utf-8?q?vi_vi_vi=2Evi_?=')
+        self.assertEqual(_ew.encode('vi vi vi.vi ', 'utf-8'), '=?utf-8?q?vi_vi_vi=2Evi_?=')
 
     def test_utf8_default(self):
         self.assertEqual(_ew.encode('foo'), '=?utf-8?q?foo?=')
@@ -192,9 +157,6 @@ class TestEncode(TestEmailBase):
         self.assertEqual(_ew.encode('foo', lang='jive'), '=?utf-8*jive?q?foo?=')
 
     def test_unknown_8bit(self):
-        self.assertEqual(_ew.encode('foo\uDCACbar', charset='unknown-8bit'),
-                         '=?unknown-8bit?q?foo=ACbar?=')
-
-
-if __name__ == '__main__':
+        self.assertEqual(_ew.encode('foo\udcacbar', charset='unknown-8bit'), '=?unknown-8bit?q?foo=ACbar?=')
+if (__name__ == '__main__'):
     unittest.main()

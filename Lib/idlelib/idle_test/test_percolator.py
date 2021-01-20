@@ -1,13 +1,13 @@
-"Test percolator, coverage 100%."
 
+'Test percolator, coverage 100%.'
 from idlelib.percolator import Percolator, Delegator
 import unittest
 from test.support import requires
 requires('gui')
 from tkinter import Text, Tk, END
 
-
 class MyFilter(Delegator):
+
     def __init__(self):
         Delegator.__init__(self, None)
 
@@ -29,7 +29,6 @@ class MyFilter(Delegator):
 
     def dont_insert(self, index, chars, tags=None):
         pass
-
 
 class PercolatorTest(unittest.TestCase):
 
@@ -66,7 +65,6 @@ class PercolatorTest(unittest.TestCase):
         self.percolator.removefilter(self.filter_two)
         self.assertEqual(self.percolator.top, self.filter_one)
         self.assertIsNone(self.filter_two.delegate)
-
         filter_three = MyFilter()
         self.percolator.insertfilter(self.filter_two)
         self.percolator.insertfilter(filter_three)
@@ -79,8 +77,7 @@ class PercolatorTest(unittest.TestCase):
     def test_insert(self):
         self.text.insert('insert', 'foo')
         self.assertEqual(self.text.get('1.0', END), 'foo\n')
-        self.assertTupleEqual(self.filter_one.insert_called_with,
-                              ('insert', 'foo', None))
+        self.assertTupleEqual(self.filter_one.insert_called_with, ('insert', 'foo', None))
 
     def test_modify_insert(self):
         self.filter_one.insert = self.filter_one.uppercase_insert
@@ -111,8 +108,6 @@ class PercolatorTest(unittest.TestCase):
         self.text.insert('insert', 'foo')
         self.text.delete('1.0', '1.2')
         self.assertEqual(self.text.get('1.0', END), 'o\n')
-        self.assertTupleEqual(self.filter_one.delete_called_with,
-                              ('1.0', '1.2'))
-
-if __name__ == '__main__':
+        self.assertTupleEqual(self.filter_one.delete_called_with, ('1.0', '1.2'))
+if (__name__ == '__main__'):
     unittest.main(verbosity=2)
